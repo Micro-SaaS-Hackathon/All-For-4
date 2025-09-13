@@ -1,0 +1,476 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "17a561ab-0538-42b9-8939-9b8a0d36e3d9",
+      "name": "Telegram Trigger",
+      "webhookId": "6d6d5978-dae4-48f2-a781-1cd8ae04f5d1",
+      "credentials": {
+        "telegramApi": {
+          "id": "mcFdDXmOtk3pkWu2",
+          "name": "ContentGenerator"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e79945ab-a22c-4186-821f-9ceba06e6984",
+              "leftValue": "={{ $json.message.chat.id }}",
+              "rightValue": 5624992594,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "129e69d0-7e57-497c-a46d-b994991793eb",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        416,
+        176
+      ],
+      "id": "5f244327-4c91-442b-93ab-67b0f20d1a31",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "/start",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "c93955d3-b0b0-42e5-83c0-b055e8c82438"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "handle start"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "f38095cf-f743-40bb-af9d-9da4b6aca3a9",
+                    "leftValue": "={{ $('Telegram Trigger').item.json.message.text }}",
+                    "rightValue": "/start",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEquals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "invalid"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        368,
+        -176
+      ],
+      "id": "65fde7e7-2dbb-437f-9def-299561840162",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.message.chat.id }}",
+        "text": "send me a prompt",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        576,
+        -112
+      ],
+      "id": "7a482535-82a2-457c-aba7-4ba6dfbd663f",
+      "name": "start message",
+      "webhookId": "a11e4223-c63b-4ffd-8e22-01443f212d81",
+      "executeOnce": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "mcFdDXmOtk3pkWu2",
+          "name": "ContentGenerator"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "binaryData": true,
+        "binaryPropertyName": "=data",
+        "additionalFields": {
+          "reply_to_message_id": "={{ $('Telegram Trigger').item.json.message.message_id }}"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1200,
+        160
+      ],
+      "id": "939fefe3-4c54-45cf-9525-ee5d99c4b89c",
+      "name": "Send a photo message",
+      "webhookId": "e5361401-13e6-4401-ac07-7ac3711986f1",
+      "credentials": {
+        "telegramApi": {
+          "id": "mcFdDXmOtk3pkWu2",
+          "name": "ContentGenerator"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash-image-preview",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash-image-preview (Nano Banana)"
+        },
+        "prompt": "={{ $('Telegram Trigger').item.json.message.text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        1008,
+        48
+      ],
+      "id": "eb05c41f-4ce9-46d4-8954-98fc377140e1",
+      "name": "Generate an image",
+      "retryOnFail": true,
+      "waitBetweenTries": 100,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "PKrPABEFvIU8Qxse",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      },
+      "notes": "Image generation failed with the following error: Unable to show generated images. All images were filtered out because they violated Google's Responsible AI practices. Try rephrasing the prompt. If you think this was an error, send feedback."
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.message.chat.id }}",
+        "text": "prompt shouldn't be too long",
+        "additionalFields": {
+          "appendAttribution": false,
+          "reply_to_message_id": "={{ $('Telegram Trigger').item.json.message.message_id }}"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1232,
+        -224
+      ],
+      "id": "59d1e940-89c4-479c-a6bd-dc052b3902d6",
+      "name": "long message",
+      "webhookId": "a11e4223-c63b-4ffd-8e22-01443f212d81",
+      "credentials": {
+        "telegramApi": {
+          "id": "mcFdDXmOtk3pkWu2",
+          "name": "ContentGenerator"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-1.5-flash-latest",
+          "mode": "list",
+          "cachedResultName": "models/gemini-1.5-flash-latest"
+        },
+        "text": "can you give captions and hashtags for this picture for instagram?",
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        1648,
+        112
+      ],
+      "id": "861053f5-cb76-4519-85c9-d04c6fb21660",
+      "name": "Analyze image",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Yjz2xAXF8w0vkDWS",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "=",
+        "text": "=",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1792,
+        112
+      ],
+      "id": "17fc824c-408f-4520-ae7b-7aa3117000d3",
+      "name": "Send a text message",
+      "webhookId": "35542523-9caf-4da2-a537-248f76a27252",
+      "credentials": {
+        "telegramApi": {
+          "id": "mcFdDXmOtk3pkWu2",
+          "name": "ContentGenerator"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Telegram Trigger').item.json.message.text.length }}",
+                    "rightValue": "/start",
+                    "operator": {
+                      "type": "number",
+                      "operation": "empty",
+                      "singleValue": true
+                    },
+                    "id": "c93955d3-b0b0-42e5-83c0-b055e8c82438"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "invalid"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "7c38702b-329e-4a6b-9c79-aec70eff7fba",
+                    "leftValue": "={{ $('Telegram Trigger').item.json.message.text.length }}",
+                    "rightValue": 1,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "valid prompt"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        736,
+        -96
+      ],
+      "id": "a3620c61-448a-4527-be28-a3c6fd78ecd4",
+      "name": "Switch1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "start message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate an image": {
+      "main": [
+        [
+          {
+            "node": "Send a photo message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Analyze image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "start message": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze image": {
+      "main": [
+        []
+      ]
+    },
+    "Send a photo message": {
+      "main": [
+        []
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Generate an image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "07442002-752e-4955-a618-07b6b49737db",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7a3bd1d60737e73d218a0e98013bc5e03199e5311e53aa3a699ca777da761b99"
+  },
+  "id": "EWxTc7mhaHWk7Ni4",
+  "tags": []
+}
